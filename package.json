@@ -1,0 +1,17 @@
+{
+  "name": "aplicacion-ems-raiz",
+  "version": "1.0.0",
+  "description": "Proyecto principal para sistema de asistencia hospitalaria",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && (cd backend && npm install) && (cd frontend && npm install)",
+    "dev": "echo \"Script dev aún no configurado con concurrently\""
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
