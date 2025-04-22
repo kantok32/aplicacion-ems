@@ -1,7 +1,7 @@
 // Placeholder para el Contexto de Autenticación
 import React, { createContext, useState, useEffect } from 'react';
-// import authService from '../services/authService';
-// import api from '../services/api'; // Instancia de axios configurada
+import authService from '../services/authService';
+import api from '../services/api'; // Instancia de axios configurada
 
 const AuthContext = createContext();
 
@@ -13,55 +13,75 @@ export const AuthProvider = ({ children }) => {
     // Intentar cargar el usuario desde localStorage o verificar token al inicio
     const token = localStorage.getItem('token');
     if (token) {
-      // api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // Aquí podrías hacer una petición para verificar el token y obtener datos del usuario
-      // authService.verifyToken().then(userData => setUser(userData)).catch(() => logout());
-      // Ejemplo simplificado:
-      // const storedUser = localStorage.getItem('user');
-      // if (storedUser) setUser(JSON.parse(storedUser));
+      // Establecer token en cabeceras de api al cargar
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // Cargar usuario desde localStorage (simplificado)
+      // En una app real, verificar token con /api/auth/me aquí
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+          try {
+              setUser(JSON.parse(storedUser));
+          } catch (e) {
+              console.error("Error parsing stored user:", e);
+              logout(); // Limpiar si los datos están corruptos
+          }
+      }
+    } else {
+        // Asegurarse que no haya token viejo en las cabeceras si no hay en localStorage
+        delete api.defaults.headers.common['Authorization'];
     }
     setLoading(false);
   }, []);
 
   const login = async (credentials) => {
-    // setLoading(true);
-    // try {
-    //   const { token, user: userData } = await authService.login(credentials);
-    //   localStorage.setItem('token', token);
-    //   localStorage.setItem('user', JSON.stringify(userData)); // Guardar datos del usuario
-    //   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    //   setUser(userData);
-    // } catch (error) {
-    //   console.error('Error en login:', error);
-    //   logout(); // Limpiar estado si falla
-    //   throw error; // Relanzar para manejar en el componente
-    // } finally {
-    //   setLoading(false);
-    // }
+    setLoading(true);
+    try {
+      // Llamar al servicio de autenticación (que maneja admin o llama a la API)
+      const { token, user: userData } = await authService.login(credentials);
+      
+      // Guardar token y usuario
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Configurar cabecera de Axios para futuras peticiones
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      // Actualizar estado del usuario en el contexto
+      setUser(userData);
+      
+    } catch (error) {
+      console.error('Error en AuthContext login:', error);
+      logout(); // Limpiar estado si falla el login
+      throw error; // Relanzar para que el componente Login muestre el error
+    } finally {
+      setLoading(false);
+    }
   };
 
   const register = async (userData) => {
-     // setLoading(true);
-    // try {
-    //   // El backend podría devolver el token y usuario directamente al registrar
-    //   const { token, user: newUser } = await authService.register(userData);
-    //   localStorage.setItem('token', token);
-    //   localStorage.setItem('user', JSON.stringify(newUser));
-    //   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    //   setUser(newUser);
-    // } catch (error) {
-    //   console.error('Error en registro:', error);
-    //   logout();
-    //   throw error;
-    // } finally {
-    //   setLoading(false);
-    // }
+     setLoading(true);
+     try {
+       // Llamar al servicio de registro
+       const { token, user: newUser } = await authService.register(userData);
+       // Asumimos que el registro exitoso también loguea al usuario
+       localStorage.setItem('token', token);
+       localStorage.setItem('user', JSON.stringify(newUser));
+       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+       setUser(newUser);
+       // No relanzar error aquí si queremos que el componente decida qué hacer
+     } catch (error) {
+       console.error('Error en AuthContext register:', error);
+       logout(); // Limpiar estado si falla
+       throw error; // Relanzar para que el componente Register muestre el error
+     } finally {
+       setLoading(false);
+     }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    // delete api.defaults.headers.common['Authorization'];
+    delete api.defaults.headers.common['Authorization'];
     setUser(null);
   };
 

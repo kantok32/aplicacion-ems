@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "install:all": "npm install && (cd backend && npm install) && (cd frontend && npm install)",
-    "dev": "echo \"Script dev aún no configurado con concurrently\""
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm start --prefix frontend",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\""
   },
   "workspaces": [
     "backend",
@@ -13,5 +15,8 @@
   ],
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
 }

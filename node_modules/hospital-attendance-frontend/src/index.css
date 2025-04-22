@@ -1,3 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Opcional: Puedes añadir estilos base personalizados aquí debajo de las directivas */
+/* body {
+  @apply bg-gray-100 text-gray-900;
+} */
+
 /* Estilos globales o configuración inicial de Tailwind/MUI */
 body {
   margin: 0;
@@ -12,11 +21,6 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
-
-/* Si usas Tailwind, importa sus directivas aquí */
-/* @tailwind base; */
-/* @tailwind components; */
-/* @tailwind utilities; */
 
 /* Estilos adicionales o personalizados */
 /* ... */ 
